@@ -27,11 +27,11 @@ Would like the parser to not use all bbcodes? Just do like this.
 ``` php
 $bbcode = new Golonka\BBCode\BBCodeParser;
 
-echo $bbcode->only('bold', 'italic')
+echo $bbcode->only('b', 'i')
             ->parse('[b][u]Bold[/u] [i]Italic[/i]![/b]');
             // <strong>[u]Bold[/u] <em>Italic</em>!</strong>
 
-echo $bbcode->except('bold')
+echo $bbcode->except('b')
             ->parse('[b]Bold[/b] [i]Italic[/i]');
             // [b]Bold[/b] <em>Italic</em>
 ```
@@ -86,12 +86,12 @@ Here are some examples.
 echo BBCode::parse('[b]Bold Text![/b]');
 
 // Limiting the parsers with the only method
-echo BBCode::only('bold', 'italic')
+echo BBCode::only('b', 'i')
         ->parse('[b][u]Bold[/u] [i]Italic[/i]![/b]');
         // <strong>[u]Bold[/u] <em>Italic</em>!</strong>
 
 // Or the except method
-echo BBCode::except('bold')
+echo BBCode::except('b')
         ->parse('[b]Bold[/b] [i]Italic[/i]');
         // [b]Bold[/b] <em>Italic</em>
 ```
