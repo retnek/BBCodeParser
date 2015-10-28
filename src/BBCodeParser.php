@@ -79,8 +79,8 @@ class BBCodeParser
 
             return '<ul>'.$items.'</ul>';
         });
-        $handlers->add('code', function(ShortcodeInterface $s) {
-            return '<code>'.$s->getContent().'</code>';
+        $handlers->add('code', function(ProcessedShortcode $s) {
+            return '<code>'.$s->getTextContent().'</code>';
         });
         $handlers->add('youtube', function(ShortcodeInterface $s) {
             return '<iframe width="560" height="315" src="//www.youtube.com/embed/'.$s->getContent().'" frameborder="0" allowfullscreen></iframe>';

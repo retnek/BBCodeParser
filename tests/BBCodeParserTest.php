@@ -43,6 +43,14 @@ class BBCodeParserTest extends PHPUnit_Framework_TestCase {
         }
     }
 
+    public function testIfParserIgnoresBBCodeInsideCodeTags()
+    {
+        $b = new BBCodeParser;
+        $result = $b->parse('[code]This is [b]code[/b]![/code]');
+
+        $this->assertEquals($result, '<code>This is [b]code[/b]!</code>');
+    }
+
     public function testCompleteBBCodeParser()
     {
         $b = new BBCodeParser;
