@@ -1,119 +1,98 @@
 <?php namespace Golonka\BBCode;
 
 use \Golonka\BBCode\Traits\ArrayTrait;
+use Thunder\Shortcode\HandlerContainer\HandlerContainer;
+use Thunder\Shortcode\Parser\RegularParser;
+use Thunder\Shortcode\Processor\Processor;
+use Thunder\Shortcode\Processor\ProcessorInterface;
+use Thunder\Shortcode\Shortcode\ProcessedShortcode;
+use Thunder\Shortcode\Shortcode\ShortcodeInterface;
 
 class BBCodeParser
 {
-
     use ArrayTrait;
 
-    public $parsers = [
-        'bold' => [
-            'pattern' => '/\[b\](.*?)\[\/b\]/s',
-            'replace' => '<strong>$1</strong>',
-            'content' => '$1'
-        ],
-        'italic' => [
-            'pattern' => '/\[i\](.*?)\[\/i\]/s',
-            'replace' => '<em>$1</em>',
-            'content' => '$1'
-        ],
-        'underline' => [
-            'pattern' => '/\[u\](.*?)\[\/u\]/s',
-            'replace' => '<u>$1</u>',
-            'content' => '$1'
-        ],
-        'linethrough' => [
-            'pattern' => '/\[s\](.*?)\[\/s\]/s',
-            'replace' => '<strike>$1</strike>',
-            'content' => '$1'
-        ],
-        'size' => [
-            'pattern' => '/\[size\=([1-7])\](.*?)\[\/size\]/s',
-            'replace' => '<font size="$1">$2</font>',
-            'content' => '$2'
-        ],
-        'color' => [
-            'pattern' => '/\[color\=(#[A-f0-9]{6}|#[A-f0-9]{3})\](.*?)\[\/color\]/s',
-            'replace' => '<font color="$1">$2</font>',
-            'content' => '$2'
-        ],
-        'center' => [
-            'pattern' => '/\[center\](.*?)\[\/center\]/s',
-            'replace' => '<div style="text-align:center;">$1</div>',
-            'content' => '$1'
-        ],
-        'left' => [
-            'pattern' => '/\[left\](.*?)\[\/left\]/s',
-            'replace' => '<div style="text-align:left;">$1</div>',
-            'content' => '$1'
-        ],
-        'right' => [
-            'pattern' => '/\[right\](.*?)\[\/right\]/s',
-            'replace' => '<div style="text-align:right;">$1</div>',
-            'content' => '$1'
-        ],
-        'quote' => [
-            'pattern' => '/\[quote\](.*?)\[\/quote\]/s',
-            'replace' => '<blockquote>$1</blockquote>',
-            'content' => '$1'
-        ],
-        'namedquote' => [
-            'pattern' => '/\[quote\=(.*?)\](.*)\[\/quote\]/s',
-            'replace' => '<blockquote><small>$1</small>$2</blockquote>',
-            'content' => '$2'
-        ],
-        'link' => [
-            'pattern' => '/\[url\](.*?)\[\/url\]/s',
-            'replace' => '<a href="$1">$1</a>',
-            'content' => '$1'
-        ],
-        'namedlink' => [
-            'pattern' => '/\[url\=(.*?)\](.*?)\[\/url\]/s',
-            'replace' => '<a href="$1">$2</a>',
-            'content' => '$2'
-        ],
-        'image' => [
-            'pattern' => '/\[img\](.*?)\[\/img\]/s',
-            'replace' => '<img src="$1">',
-            'content' => '$1'
-        ],
-        'orderedlistnumerical' => [
-            'pattern' => '/\[list=1\](.*?)\[\/list\]/s',
-            'replace' => '<ol>$1</ol>',
-            'content' => '$1'
-        ],
-        'orderedlistalpha' => [
-            'pattern' => '/\[list=a\](.*?)\[\/list\]/s',
-            'replace' => '<ol type="a">$1</ol>',
-            'content' => '$1'
-        ],
-        'unorderedlist' => [
-            'pattern' => '/\[list\](.*?)\[\/list\]/s',
-            'replace' => '<ul>$1</ul>',
-            'content' => '$1'
-        ],
-        'listitem' => [
-            'pattern' => '/\[\*\](.*)/',
-            'replace' => '<li>$1</li>',
-            'content' => '$1'
-        ],
-        'code' => [
-            'pattern' => '/\[code\](.*?)\[\/code\]/s',
-            'replace' => '<code>$1</code>',
-            'content' => '$1'
-        ],
-        'youtube' => [
-            'pattern' => '/\[youtube\](.*?)\[\/youtube\]/s',
-            'replace' => '<iframe width="560" height="315" src="//www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
-            'content' => '$1'
-        ],
-        'linebreak' => [
-            'pattern' => '/\r\n/',
-            'replace' => '<br />',
-            'content' => ''
-        ]
-    ];
+    /** @var ProcessorInterface */
+    private $shortcode;
+    /** @var HandlerContainer */
+    private $handlers;
+
+    public function __construct()
+    {
+        $this->shortcode = new Processor(new RegularParser(), $this->createHandlers());
+    }
+
+    private function createHandlers()
+    {
+        $handlers = new HandlerContainer();
+
+        $handlers->add('b', function(ShortcodeInterface $s) {
+            return '<strong>'.$s->getContent().'</strong>';
+        });
+        $handlers->add('i', function(ShortcodeInterface $s) {
+            return '<em>'.$s->getContent().'</em>';
+        });
+        $handlers->add('u', function(ShortcodeInterface $s) {
+            return '<u>'.$s->getContent().'</u>';
+        });
+        $handlers->add('s', function(ShortcodeInterface $s) {
+            return '<strike>'.$s->getContent().'</strike>';
+        });
+        $handlers->add('size', function(ShortcodeInterface $s) {
+            return '<font size="'.$s->getBbCode().'">'.$s->getContent().'</font>';
+        });
+        $handlers->add('color', function(ShortcodeInterface $s) {
+            return '<font color="#'.$s->getBbCode().'">'.$s->getContent().'</font>';
+        });
+        $handlers->add('center', function(ShortcodeInterface $s) {
+            return '<div style="text-align:center;">'.$s->getContent().'</div>';
+        });
+        $handlers->add('left', function(ShortcodeInterface $s) {
+            return '<div style="text-align:left;">'.$s->getContent().'</div>';
+        });
+        $handlers->add('right', function(ShortcodeInterface $s) {
+            return '<div style="text-align:right;">'.$s->getContent().'</div>';
+        });
+        $handlers->add('quote', function(ShortcodeInterface $s) {
+            return '<blockquote>'.($s->getBbCode() ? '<small>'.$s->getBbCode().'</small>' : '').$s->getContent().'</blockquote>';
+        });
+        $handlers->add('url', function(ShortcodeInterface $s) {
+            return '<a href="'.($s->getBbCode() ?: $s->getContent()).'">'.$s->getContent().'</a>';
+        });
+        $handlers->add('img', function(ShortcodeInterface $s) {
+            return '<img src="'.$s->getContent().'">';
+        });
+        $handlers->add('list', function(ShortcodeInterface $s) {
+            $items = '';
+            $listItems = array_filter(array_map('trim', explode('[*]', $s->getContent())));
+            foreach($listItems as $item) {
+                $items .= '<li>'.$item.'</li>';
+            }
+
+            if('1' === $s->getBbCode()) {
+                return '<ol>'.$items.'</ol>';
+            }
+
+            if('a' === $s->getBbCode()) {
+                return '<ol type="a">'.$items.'</ol>';
+            }
+
+            return '<ul>'.$items.'</ul>';
+        });
+        $handlers->add('code', function(ProcessedShortcode $s) {
+            return '<code>'.$s->getTextContent().'</code>';
+        });
+        $handlers->add('youtube', function(ShortcodeInterface $s) {
+            return '<iframe width="560" height="315" src="//www.youtube.com/embed/'.$s->getContent().'" frameborder="0" allowfullscreen></iframe>';
+        });
+        $handlers->add('linebreak', function(ShortcodeInterface $s) {
+            return '<br />';
+        });
+
+        $this->handlers = $handlers;
+
+        return $handlers;
+    }
 
     /**
      * Parses the BBCode string
@@ -122,12 +101,17 @@ class BBCodeParser
      */
     public function parse($source, $caseInsensitive = false)
     {
-        foreach ($this->parsers as $name => $parser) {
-            $pattern = ($caseInsensitive) ? $parser['pattern'].'i' : $parser['pattern'];
+        if($caseInsensitive) {
+            $handlers = $this->handlers;
 
-            $source = $this->searchAndReplace($pattern, $parser['replace'], $source);
+            $this->handlers->setDefault(function(ProcessedShortcode $s) use($handlers) {
+                $handler = $handlers->get(strtolower($s->getName()));
+
+                return $handler ? call_user_func_array($handler, array($s)) : $s->getShortcodeText();
+            });
         }
-        return $source;
+
+        return $this->shortcode->process($source);
     }
 
     /**
@@ -137,10 +121,11 @@ class BBCodeParser
      */
     public function stripBBCodeTags($source)
     {
-        foreach ($this->parsers as $name => $parser) {
-            $source = $this->searchAndReplace($parser['pattern'].'i', $parser['content'], $source);
-        }
-        return $source;
+        $handlers = new HandlerContainer();
+        $handlers->setDefault(function(ShortcodeInterface $s) { return $s->getContent(); });
+        $processor = new Processor(new RegularParser(), $handlers);
+
+        return $processor->process($source);
     }
     /**
      * Searches after a specified pattern and replaces it with provided structure
@@ -185,8 +170,19 @@ class BBCodeParser
      */
     public function only($only = null)
     {
-        $only = (is_array($only)) ? $only : func_get_args();
-        $this->parsers = $this->arrayOnly($this->parsers, $only);
+        if(null === $only) {
+            return $this;
+        }
+
+        $handlers = new HandlerContainer();
+
+        foreach(func_get_args() as $name) {
+            $handlers->add($name, $this->handlers->get($name));
+        }
+
+        $this->handlers = $handlers;
+        $this->shortcode = new Processor(new RegularParser(), $this->handlers);
+
         return $this;
     }
 
@@ -197,8 +193,16 @@ class BBCodeParser
      */
     public function except($except = null)
     {
-        $except = (is_array($except)) ? $except : func_get_args();
-        $this->parsers = $this->arrayExcept($this->parsers, $except);
+        if(null === $except) {
+            return $this;
+        }
+
+        foreach(func_get_args() as $name) {
+            $this->handlers->remove($name);
+        }
+
+        $this->shortcode = new Processor(new RegularParser(), $this->handlers);
+
         return $this;
     }
 
@@ -208,22 +212,19 @@ class BBCodeParser
      */
     public function getParsers()
     {
-        return $this->parsers;
+        return $this->handlers->getNames();
     }
 
     /**
      * Sets the parser pattern and replace.
      * This can be used for new parsers or overwriting existing ones.
      * @param string $name Parser name
-     * @param string $pattern Pattern
-     * @param string $replace Replace pattern
+     * @param string $handler handler
      * @return void
      */
-    public function setParser($name, $pattern, $replace)
+    public function setParser($name, $handler)
     {
-        $this->parsers[$name] = array(
-            'pattern' => $pattern,
-            'replace' => $replace
-        );
+        $this->handlers->add($name, $handler);
+        $this->shortcode = new Processor(new RegularParser(), $this->handlers);
     }
 }
