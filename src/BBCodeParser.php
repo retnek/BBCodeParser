@@ -153,13 +153,19 @@ class BBCodeParser
     }
 
     /**
-     * Remove all BBCode
+     * Remove all BBCode except the $except parameter names
      * @param  string $source
+     * @param  array $except an array of the parser names
      * @return string Parsed text
      */
-    public function stripBBCodeTags($source)
+    public function stripBBCodeTags($source, $except = [])
     {
         foreach ($this->parsers as $name => $parser) {
+            if (in_array(strtolower($name), $except)) {
+                // does not have to strip this bbcode tag
+                continue;
+            }
+
             $source = $this->searchAndReplace($parser['pattern'].'i', $parser['content'], $source);
         }
         return $source;

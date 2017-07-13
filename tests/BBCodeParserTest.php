@@ -212,6 +212,17 @@ class BBCodeParserTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($result, 'I am one beautiful bird!');
     }
 
+    public function testRemovalOfBBCodeTagsExcept()
+    {
+        $b = new BBCodeParser;
+        $result = $b->stripBBCodeTags('[u]Magpie[/u] is one [b]beautiful[/b] bird!', ['underline']);
+        $this->assertEquals($result, '[u]Magpie[/u] is one beautiful bird!');
+
+        $b = new BBCodeParser;
+        $result = $b->stripBBCodeTags('[QUOTE=Magpie]I am one [B]beautiful[/B] bird![/QUOTE]', ['quote', 'namedquote', 'bold']);
+        $this->assertEquals($result, '[QUOTE=Magpie]I am one [B]beautiful[/B] bird![/QUOTE]');
+    }
+
     public function testStatelessParsers()
     {
         $b = new BBCodeParser;
